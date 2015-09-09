@@ -8,8 +8,6 @@ use Fetch\Server;
 
 /**
  * Class ServerCustom
- *
- * @package TTPS\EmailBloggerBundle\EmailBlogger
  */
 class ServerCustom extends Server
 {
@@ -34,10 +32,20 @@ class ServerCustom extends Server
         $numMessages = $this->numMessages();
         $stream = $this->getImapStream();
         if (0 != $numMessages) {
-            $uid = imap_uid($stream, $numMessages);
+            $uid = $this->decodeUid($stream, $numMessages);
         }
 
         return $uid;
+    }
+
+    protected function decodeUid($stream, $messageNumber)
+    {
+        return imap_uid($stream, $messageNumber);
+    }
+
+    protected function createMessage($uid)
+    {
+        return new Message($uid, $this);
     }
 
     /**
@@ -63,11 +71,11 @@ class ServerCustom extends Server
         $stream = $this->getImapStream();
 
         for ($i = $numMessages; $i > $numLimit; $i--) {
-            $newUid        = imap_uid($stream, $i);
+            $newUid        = $this->decodeUid($stream, $i);
             if ($newUid === $uid) {
                 break;
             }
-            $messages[] = new Message($newUid, $this);
+            $messages[] = $this->createMessage($uid);
         }
 
         return $messages;
