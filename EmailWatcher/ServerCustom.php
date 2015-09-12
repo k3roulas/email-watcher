@@ -75,7 +75,7 @@ class ServerCustom extends Server
             if ($newUid === $uid) {
                 break;
             }
-            $messages[] = $this->createMessage($uid);
+            $messages[] = $this->createMessage($newUid);
         }
 
         return $messages;

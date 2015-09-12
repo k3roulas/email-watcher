@@ -32,7 +32,7 @@ class EmailTrigger
      * @param LastUidPersistInterface  $lastUidPersist
      * @param integer                  $maxNewEmails
      */
-    public function __construct(Fetcher $emailFetcher,NewEmailWatcherInterface $watcher, LastUidPersistInterface $lastUidPersist, $maxNewEmails = 15)
+    public function __construct(Fetcher $emailFetcher, NewEmailWatcherInterface $watcher, LastUidPersistInterface $lastUidPersist, $maxNewEmails = 15)
     {
         $this->fetcher = $emailFetcher;
         $this->watcher = $watcher;
@@ -57,9 +57,9 @@ class EmailTrigger
                 $this->watcher->newEmail($message);
             }
 
+            $this->lastUidPersist->setLastUid($lastRemoteId);
         }
 
-        $this->lastUidPersist->setLastUid($lastRemoteId);
     }
 
 
