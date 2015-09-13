@@ -3,6 +3,7 @@
 namespace K3roulas\EmailWatcher;
 
 use Fetch\Server;
+use K3roulas\EmailWatcher\Exception\ParameterException;
 use K3roulas\EmailWatcher\LastUidPersist\LastUidPersistFile;
 use K3roulas\EmailWatcher\LastUidPersist\LastUidPersistInterface;
 
@@ -42,13 +43,9 @@ class Watcher
     /** @var Server */
     private $fetchServer;
 
-    /**
-     *
-     */
     public function __construct()
     {
-        $this->fetcher = null;
-        $this->newEmailWatcher = null;
+        $this->initCalled = false;
     }
 
     /**
@@ -120,7 +117,7 @@ class Watcher
     {
         $allowedProtocol = array('imap', 'pop3');
         if (false === array_search($protocol, $allowedProtocol)) {
-            throw new \Exception('Unknown protocol');
+            throw new ParameterException('Unknown protocol');
         }
 
         $this->protocol = $protocol;
@@ -187,38 +184,38 @@ class Watcher
     private function checkConfigurationWithFetchServer()
     {
         if (null === $this->server) {
-            throw new \Exception('server is null, you must init a valid server by calling setServer');
+            throw new ParameterException('server is null, you must init a valid server by calling setServer');
         }
         if (null === $this->port) {
-            throw new \Exception('port is null, you must init a valid port by calling setPort');
+            throw new ParameterException('port is null, you must init a valid port by calling setPort');
         }
         if (null === $this->email) {
-            throw new \Exception('email is null, you must init a valid email by calling setEmail');
+            throw new ParameterException('email is null, you must init a valid email by calling setEmail');
         }
         if (null === $this->password) {
-            throw new \Exception('password is null, you must init a valid password by calling setPassword');
+            throw new ParameterException('password is null, you must init a valid password by calling setPassword');
         }
         if (null === $this->protocol) {
-            throw new \Exception('protocol is null, you must init a valid protocol by calling setProtocol');
+            throw new ParameterException('protocol is null, you must init a valid protocol by calling setProtocol');
         }
     }
 
     private function checkConfigurationWithoutFetchServer()
     {
         if (null !== $this->server) {
-            throw new \Exception('server has to be null when you call setFetchServer');
+            throw new ParameterException('server has to be null when you call setFetchServer');
         }
         if (null !== $this->port) {
-            throw new \Exception('port has to be null when you call setFetchServer');
+            throw new ParameterException('port has to be null when you call setFetchServer');
         }
         if (null !== $this->email) {
-            throw new \Exception('email has to be null when you call setFetchServer');
+            throw new ParameterException('email has to be null when you call setFetchServer');
         }
         if (null !== $this->password) {
-            throw new \Exception('password has to be null when you call setFetchServer');
+            throw new ParameterException('password has to be null when you call setFetchServer');
         }
         if (null !== $this->protocol) {
-            throw new \Exception('protocol has to be null when you call setFetchServer');
+            throw new ParameterException('protocol has to be null when you call setFetchServer');
         }
 
     }
@@ -234,23 +231,28 @@ class Watcher
         }
 
         if (null === $this->newEmailWatcher) {
-            throw new \Exception('newEmailWatcher is null, you must call setNewEmailWatcher');
+            throw new ParameterException('newEmailWatcher is null, you must call setNewEmailWatcher');
         }
 
         if (null === $this->lastUidPersist && null === $this->filename) {
-            throw new \Exception('a filename or a lastUidPersist object has to be provided');
+            throw new ParameterException('a filename or a lastUidPersist object has to be provided');
         }
 
         if (null !== $this->lastUidPersist && null !== $this->filename) {
-            throw new \Exception('make a choice between using a filename or the a lastuidPersist object');
+            throw new ParameterException('make a choice between using a filename or the a lastuidPersist object');
         }
 
 
     }
 
+    protected function createServer($server, $port)
+    {
+        return new Server($server, $port);
+    }
+
 
     /**
-     * @throws \Exception
+     * @throws ParameterException
      */
     public function init()
     {
@@ -258,10 +260,13 @@ class Watcher
 
         $this->initCalled = true;
 
-        $fetchServer = new Server($this->server, $this->port);
-        $fetchServer->setAuthentication($this->email, $this->password);
+        if ($this->fetchServer === null) {
+            $this->fetchServer = $this->createServer($this->server, $this->port);
+            $this->fetchServer->setAuthentication($this->email, $this->password);
+        }
 
-        $serverCustom = new ServerCustom($fetchServer);
+        $serverCustom = new ServerCustom($this->fetchServer);
+
         if ($this->filename) {
             $this->lastUidPersist = new LastUidPersistFile($this->filename);
         }
@@ -274,7 +279,7 @@ class Watcher
     }
 
     /**
-     * @throws \Exception
+     * @throws ParameterException
      */
     public function process()
     {
