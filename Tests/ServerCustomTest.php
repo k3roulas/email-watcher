@@ -24,7 +24,7 @@ class ServerCustomTest extends \PHPUnit_Framework_TestCase
     {
 //        $server = $this->getMockBuilder('K3roulas\EmailWatcher\ServerCustom')
 //            ->disableOriginalConstructor()
-//            ->setMethods(array('numMessages', 'getImapStream', 'decodeUid'))
+//            ->setMethods(array('numMessages', 'getImapStream', 'getMessage'))
 //            ->getMock();
 //        $imapStream = 99;
 //        $numMessages = 5;
@@ -40,7 +40,7 @@ class ServerCustomTest extends \PHPUnit_Framework_TestCase
 //            ->will($this->returnValue($imapStream));
 //
 //        $server->expects($this->once())
-//            ->method('decodeUid')
+//            ->method('getMessage')
 //            ->with($imapStream, $numMessages)
 //            ->will($this->returnValue($uid));
 //
@@ -74,18 +74,10 @@ class ServerCustomTest extends \PHPUnit_Framework_TestCase
 
         $imapStream = 99;
 
-        $server = $this->getMockBuilder('K3roulas\EmailWatcher\ServerCustom')
+        $server = $this->getMockBuilder('Fetch\Server')
             ->disableOriginalConstructor()
-            ->setMethods(array('numMessages', 'getImapStream', 'decodeUid', 'createMessage'))
+            ->setMethods(array('numMessages', 'getImapStream'))
             ->getMock();
-
-        $server->expects($this->any())
-            ->method('decodeUid')
-            ->willReturnCallback(array($this, 'getMessageForTestGetMessageUntil'));
-
-        $server->expects($this->any())
-            ->method('createMessage')
-            ->willReturnCallback(array($this, 'createMessageForTestGetMessageUntil'));
 
         $server->expects($this->any())
             ->method('getImapStream')
@@ -95,7 +87,22 @@ class ServerCustomTest extends \PHPUnit_Framework_TestCase
             ->method('numMessages')
             ->will($this->returnValue(count($this->uids)));
 
-        return $server;
+
+        $serverCustom = $this->getMockBuilder('K3roulas\EmailWatcher\ServerCustom')
+            ->setMethods(array('getMessage', 'createMessage'))
+            ->setConstructorArgs(array($server))
+            ->getMock();
+
+        $serverCustom->expects($this->any())
+            ->method('getMessage')
+            ->willReturnCallback(array($this, 'getMessageForTestGetMessageUntil'));
+
+        $serverCustom->expects($this->any())
+            ->method('createMessage')
+            ->willReturnCallback(array($this, 'createMessageForTestGetMessageUntil'));
+
+
+        return $serverCustom;
 
     }
 

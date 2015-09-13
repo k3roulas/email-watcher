@@ -9,18 +9,21 @@ use Fetch\Server;
 /**
  * Class ServerCustom
  */
-class ServerCustom extends Server
+class ServerCustom
 {
-    /**
-     * @param string $serverPath
-     * @param int    $port
-     * @param string $service
-     */
-    public function __construct($serverPath, $port = 143, $service = 'imap')
-    {
-        parent::__construct($serverPath, $port, $service);
-    }
 
+    /**
+     * @var \Fetch\Server
+     */
+    private $server;
+
+    /**
+     * @param Server $server
+     */
+    public function __construct(Server $server)
+    {
+        $this->server = $server;
+    }
 
     /**
      * @return int|null
@@ -29,23 +32,34 @@ class ServerCustom extends Server
     {
         $uid = null;
 
-        $numMessages = $this->numMessages();
-        $stream = $this->getImapStream();
+        $numMessages = $this->server->numMessages();
+        $stream = $this->server->getImapStream();
         if (0 != $numMessages) {
-            $uid = $this->decodeUid($stream, $numMessages);
+            $uid = $this->getMessage($stream, $numMessages);
         }
 
         return $uid;
     }
 
-    protected function decodeUid($stream, $messageNumber)
+    /**
+     * @param integer $stream
+     * @param integer $messageNumber
+     *
+     * @return int
+     */
+    protected function getMessage($stream, $messageNumber)
     {
         return imap_uid($stream, $messageNumber);
     }
 
+    /**
+     * @param integer $uid
+     *
+     * @return Message
+     */
     protected function createMessage($uid)
     {
-        return new Message($uid, $this);
+        return new Message($uid, $this->server);
     }
 
     /**
@@ -60,7 +74,7 @@ class ServerCustom extends Server
     {
         $messages = array();
 
-        $numMessages = $this->numMessages();
+        $numMessages = $this->server->numMessages();
 
         if ($numMessages > $limit) {
             $numLimit = $numMessages - $limit;
@@ -68,10 +82,10 @@ class ServerCustom extends Server
             $numLimit = 0;
         }
 
-        $stream = $this->getImapStream();
+        $stream = $this->server->getImapStream();
 
         for ($i = $numMessages; $i > $numLimit; $i--) {
-            $newUid        = $this->decodeUid($stream, $i);
+            $newUid        = $this->getMessage($stream, $i);
             if ($newUid === $uid) {
                 break;
             }
