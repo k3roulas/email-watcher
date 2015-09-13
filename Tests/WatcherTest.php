@@ -41,6 +41,39 @@ class WatcherTest extends \PHPUnit_Framework_TestCase
             ->init();
     }
 
+    public function testNominalPop3Parameter()
+    {
+
+        $watcher = $this->getMockBuilder('K3roulas\EmailWatcher\Watcher')
+            ->setMethods(array('createServer'))
+            ->getMock();
+
+        $fetchServer = $this->getMockBuilder('Fetch\Server')
+            ->disableOriginalConstructor()
+            ->setMethods(array('setAuthentication'))
+            ->getMock();
+
+        $fetchServer->expects($this->once())
+            ->method('setAuthentication');
+
+
+        $watcher->expects($this->once())
+            ->method('createServer')
+            ->will($this->returnValue($fetchServer));
+
+        $newEmail = new NewEmailWatcherDump();
+
+        $watcher->setServer('server')
+            ->setPort('port')
+            ->setEmail('email')
+            ->setProtocol('pop3')
+            ->setPassword('password')
+            ->setFilename('filename')
+            ->setNewEmailWatcher($newEmail)
+            ->init();
+    }
+
+
     public function testParameterWithoutPort()
     {
         $newEmail = new NewEmailWatcherDump();
@@ -122,6 +155,21 @@ class WatcherTest extends \PHPUnit_Framework_TestCase
             ->setPort('port')
             ->setEmail('email')
             ->setProtocol('imap')
+            ->setPassword('password')
+            ->setFilename('filename')
+            ->init();
+    }
+
+    public function testParameterWrongProtocol()
+    {
+        $this->setExpectedException('K3roulas\EmailWatcher\Exception\ParameterException');
+
+        $watcher = new Watcher();
+
+        $watcher->setServer('server')
+            ->setPort('port')
+            ->setEmail('email')
+            ->setProtocol('http')
             ->setPassword('password')
             ->setFilename('filename')
             ->init();
@@ -237,10 +285,6 @@ class WatcherTest extends \PHPUnit_Framework_TestCase
 
         $watcher->process();
     }
-
-
-
-
 
 
 }
