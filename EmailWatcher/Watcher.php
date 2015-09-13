@@ -115,7 +115,7 @@ class Watcher
      */
     public function setProtocol($protocol)
     {
-        $allowedProtocol = array('imap', 'pop3');
+        $allowedProtocol = array('imap', 'pop3', 'nntp');
         if (false === array_search($protocol, $allowedProtocol)) {
             throw new ParameterException('Unknown protocol');
         }
