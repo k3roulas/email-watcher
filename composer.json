@@ -16,10 +16,11 @@
         "ext-imap": "*"
     },
     "require-dev": {
+        "tedivm/fetch": "~0.7",
         "mikey179/vfsStream": "~1",
         "phpunit/phpunit": "4.2.*"
     },
     "autoload": {
-        "psr-4": {"K3roulas\\EmailWatcher": ""}
+        "psr-4": {"K3roulas\\EmailWatcher\\": ""}
     }
 }
