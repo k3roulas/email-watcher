@@ -1,0 +1,26 @@
+{
+    "name": "k3roulas/email-watcher",
+    "description": "Email watcher : trig an action on a new email (protocol pop3, imap)",
+    "keywords": ["watcher", "trigger", "email","imap","pop3"],
+    "homepage": "http://github.com/k3roulas/email-watcher",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+    {
+        "name": "k3roulas",
+        "email": "k3roulas@gmail.com"
+    }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "ext-imap": "*",
+        "tedivm/fetch": "~0.7"
+    },
+    "require-dev": {
+        "mikey179/vfsStream": "~1",
+        "phpunit/phpunit": "4.2.*"
+    },
+    "autoload": {
+        "psr-4": {"K3roulas\\EmailWatcher\\": ""}
+    }
+}
